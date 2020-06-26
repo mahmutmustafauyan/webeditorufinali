@@ -1,1 +1,118 @@
+Problem 508: MOST FREQUENT SUBTREE SUM
+En yüksek frekansa sahip tüm değerleri herhangi bir sırayla döndürdüm. Herhangi bir alt ağaçtaki değerlerin toplamının 32 bit işaretli tam sayı aralığında olduğunu varsayabiliriz.
+
+var findFrequentTreeSum = function(root) {
+    var res = [],
+        hash = {},
+        max = 0;
+        
+    findSum(root);
+
+    for (var key in hash) {
+        if (hash[key] === max) {
+            res.push(parseInt(key));
+        }
+    }
+    return res;
+
+    function findSum(root) {
+        var left, right;
+        if (!root) return 0;
+
+        left = findSum(root.left);
+        right = findSum(root.right);
+
+        sum = left + right + root.val;
+        root.val = sum;
+        hash[sum] = (hash[sum] || 0) + 1;
+        max = Math.max(max, hash[sum]);
+        return sum;
+    }
+};
+_____________________________________________________________________________________________________________________________________________________________________
+PROBLEM 28: İmplement strStr()
+İğne samanlıkta ilk iğne oluşumunun dizinini veya iğne samanlığın bir parçası değilse -1 değerini döndürür.
+class Solution {
+    public int strStr(String haystack, String needle) {
+        int m = haystack.length();
+        int n = needle.length();
+        int ans = -1;
+        
+        int pos = 0; //needle cursor
+        int i;
+        for(i = 0; i<m && pos != n; i++){
+            char c1 = haystack.charAt(i);
+            char c2 = needle.charAt(pos);
+            if(c1 == c2){
+                pos++;
+            }else{
+                i -= pos;
+                pos = 0;
+            }
+        }
+        if(pos == n){
+            ans = i - n;
+        }
+        return ans;
+    }
+}
+__________________________________________________________________________________________________________________________________________________________________________________
+
+PROBLEM 58: LENGTH OF LAST WORD
+Son sözcüğün uzunluğunu aşağıdaki kod ile buldum.
+
+const lengthOfLastWord = (s) => {
+    let count = 0
+    for (let i = s.length-1; i >= 0; i--) {
+        if (s[i] === ' ') {
+            if (count === 0) {
+                continue
+            }
+            break
+        }
+        count++
+    }
+    return count
+}
+___________________________________________________________________________________________________________________________________________________________________________
+PROBLEM 48: Rotate İmage
+
+Resmi saat yönünde 90 derece döndürdüm.
+class Solution {
+    
+    private void rotate(int[][] matrix, int sI, int sJ, int col){
+        for(int i = 0; i < col - 1; i++){
+            int c = col + sI;
+            int[] temp = {matrix[sI][sJ+i], matrix[sI+i][c-1], matrix[c-1][c-1-i],
+                         matrix[c-1-i][sI]};
+            matrix[sI][sJ+i] = temp[3];
+            matrix[sI+i][c-1] = temp[0];
+            matrix[c-1][c-1-i] = temp[1];
+            matrix[c-1-i][sI] = temp[2];
+        }
+        
+        if(col - 2 > 1){
+            rotate(matrix, sI+1, sJ+1, col - 2);
+        }
+    }
+    
+    public void rotate(int[][] matrix) {
+        if(matrix.length == 0){
+            return;
+        }
+        int col = matrix.length;
+        rotate(matrix, 0, 0, col);
+    }
+}
+
+_________________________________________________________________________________________________________________________________________________________________________________
+PROBLEM 88: Merge Sorted Array
+İki sıralı tamsayı dizileri nums1 ve nums2 göz önüne alındığında, bir sıralı dizi olarak nums1 içine nums2 birleştirme.
+class Solution {
+    public void merge(int[] nums1, int m, int[] nums2, int n) {
+        for(int i=0;i<n;i++)
+            nums1[i+m]=nums2[i];
+        Arrays.sort(nums1);
+    }
+}
 
