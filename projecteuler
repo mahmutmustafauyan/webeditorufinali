@@ -1,1 +1,278 @@
+PROBLEM 8 : LARGEST PRODUCT IN A SERIES
+En büyük 1000 basamaklı sayıdaki dört bitişik basamak 9 × 9 × 8 × 9 = 5832.
+
+public class Euler8
+{
+    private String big = "73167176531330624919225119674426574742355349194934" +
+                         "96983520312774506326239578318016984801869478851843" +
+                         "85861560789112949495459501737958331952853208805511" +
+                         "12540698747158523863050715693290963295227443043557" +
+                         "66896648950445244523161731856403098711121722383113" +
+                         "62229893423380308135336276614282806444486645238749" +
+                         "30358907296290491560440772390713810515859307960866" +
+                         "70172427121883998797908792274921901699720888093776" +
+                         "65727333001053367881220235421809751254540594752243" +
+                         "52584907711670556013604839586446706324415722155397" +
+                         "53697817977846174064955149290862569321978468622482" +
+                         "83972241375657056057490261407972968652414535100474" +
+                         "82166370484403199890008895243450658541227588666881" +
+                         "16427171479924442928230863465674813919123162824586" +
+                         "17866458359124566529476545682848912883142607690042" +
+                         "24219022671055626321111109370544217506941658960408" +
+                         "07198403850962455444362981230987879927244284909188" +
+                         "84580156166097919133875499200524063689912560717606" +
+                         "05886116467109405077541002256983155200055935729725" +
+                         "71636269561882670428252483600823257530420752963450";
+
+    private ArrayList strToNums( String strpart )
+    {
+        ArrayList result = new ArrayList();
+        String[] numstrings = strpart.split( "" );
+        for (int i = 1; i < numstrings.length; i++)
+        {
+            result.add( new Integer( numstrings[i] ) );
+        }
+
+        return result;
+    }
+
+    public long find()
+    {
+        long biggest = 0;
+        for (int i = 0; i < big.length() - 5; i++ )
+        {
+           ArrayList n = strToNums( big.substring( i, i+5 ) );
+            long tmp = n.get(0);
+            for (int j = 1; j < n.size(); j++)
+            {
+                tmp *= n.get(j);
+            }
+            if ( tmp > biggest )
+            {
+                biggest = tmp;
+            }
+        }
+        return biggest;
+    }
+}
+
+SONUÇ: 23514624000
+___________________________________________________________________________________________________________________________________________________________________________
+PROBLEM 88: PRODUCT-SUM NUMBERS
+
+	import java.util.Arrays;
+  import java.util.HashSet;
+	import java.util.Set;
+	
+
+	
+
+	public final class p088 implements EulerSolution {
+		
+		public static void main(String[] args) {
+			System.out.println(new p088().run());
+		}
+		
+		
+		private static final int LIMIT = 12000;
+		
+		
+		/* 
+		 * minSumProduct [k], hem toplam hem de aynı k pozitif tam sayı koleksiyonunun bir ürünü olarak yazılabilen en küçük pozitif tamsayılardır.
+		 * Örneğin, minSumProduct [3] = 6 çünkü 6 = 1 + 2 + 3 = 1 * 2 * 3 ve bu 3 terim için mümkün olan minimum sayıdır.
+	 
+		 * Hepsi için k >= 2:
+		 * - minSumProduct[k] > k çünkü 1 + ... + 1 (k terimleriyle) = k, k pozitif tamsayıların minimum toplamı,
+		 *   ancak ürün k için eşit olmayan 1'dir, bu nedenle k geçerli bir çözüm değildir.
+		 * - minSumProduct[k] <= 2k çünkü 1 + ... + 1 + 2 + k (toplamda k terimi ile) = (k - 2) + 2 + k = 2k. Ürün toplamına eşit olan 2k'dir.
+		 *   Bu ulaşılabilir bir çözüm olduğundan, minimum çözüm bundan daha büyük olmamalıdır.
+		 * - minSumProduct [k] asal bir sayı değildir. Olduğunu varsayarsak minSumProduct[k] = p, p nin asal olduğu yerde. O zaman p sadece p, p * 1, p * 1 * 1 vb. Olarak çarpanlarına ayrılabilir.
+		 *   Dolayısıyla, çarpanlara ayırma işleminin birden fazla terimi olduğunda toplam, p değerini aşar ve bu da onu ürün için eşitsiz kılar.
+	
+		 * Bu nedenle, 2'den LIMIT * 2'ye kadar olan tüm sayıları dikkate almalı ve ilgili tüm çözümleri bulmak için tüm olası yollarla çarpanlarına ayırmalıyız.
+		 */
+		private int[] minSumProduct;
+		
+		
+		public String run() {
+			minSumProduct = new int[LIMIT + 1];
+			Arrays.fill(minSumProduct, Integer.MAX_VALUE);
+			for (int i = 2; i <= LIMIT * 2; i++)
+				factorize(i, i, i, 0, 0);
+			
+			// Eliminate duplicates and compute sum
+			Set<Integer> items = new HashSet<>();
+			for (int i = 2; i < minSumProduct.length; i++)
+				items.add(minSumProduct[i]);
+			int sum = 0;
+			for (int n : items)
+				sum += n;
+			return Integer.toString(sum);
+		}
+		
+		
+		/* 
+		 * N> = 2 tamsayısının tüm çarpanlarına ayırma işlemlerini hesaplar ve küçük çözümleri minSumProduct olarak günceller.
+		 * Örneğin, 12 aşağıdaki gibi çarpanlara ayrılabilir - ve kopyalar sadece artmayan faktör dizileri bulunarak ortadan kaldırılır:
+		 * - 12 = 12. (1 terim)
+		 * - 12 = 6 * 2 * 1 * 1 * 1 * 1 = 6 + 2 + 1 + 1 + 1 + 1. (6 terim)
+		 * - 12 = 4 * 3 * 1 * 1 * 1 * 1 * 1 = 4 + 3 + 1 + 1 + 1 + 1 + 1. (7 terim)
+		 * - 12 = 3 * 2 * 2 * 1 * 1 * 1 * 1 * 1 = 3 + 2 + 2 + 1 + 1 + 1 + 1 + 1. (8 terim)
+		 */
+		private void factorize(int n, int remain, int maxFactor, int sum, int terms) {
+			if (remain == 1) {
+				if (sum > n)  // Without using factors of 1, the sum never exceeds the product
+					throw new AssertionError();
+				
+				terms += n - sum;
+				if (terms <= LIMIT && n < minSumProduct[terms])
+					minSumProduct[terms] = n;
+				
+			} else {
+				// Note: maxFactor <= remain
+				for (int i = 2; i <= maxFactor; i++) {
+					if (remain % i == 0) {
+						int factor = i;
+						factorize(n, remain / factor, Math.min(factor, maxFactor), sum + factor, terms + 1);
+					}
+				}
+			}
+		}
+		
+	}
+_______________________________________________________________________________________________________________________________________________________________________________
+PROBLEM 58: SPİRAL PRİMES
+1 ile başlayarak ve aşağıdaki şekilde saat yönünün tersine spiral olarak, yan uzunluğu 7 olan bir kare spiral oluşuyor.
+    {
+		
+		public static void main(String[] args) {
+			System.out.println(new p058().run());
+		}
+		
+		
+		/* 
+		 * Diyagramdan, n * n karesinin dört köşesini inceleyelim.
+		 * - Sağ alt köşede her zaman n ^ 2 değeri bulunur.
+		 * Saat yönünde (geriye doğru) çalışma:
+		 * - Sol alt köşede n ^ 2 - (n - 1) değeri vardır.
+		 * - Sol üst köşede n ^ 2 - 2 (n - 1) değeri bulunur.
+		 * - Sağ üstteki n ^ 2 - 3 (n - 1) değeri var.
+		 * 
+		 * Ayrıca, diyagonal üzerindeki eleman sayısı 2n - 1'dir.
+	        */
+		 
+		public String run() {
+			int numPrimes = 0;
+			for (int n = 1; ; n += 2) {
+				for (int i = 0; i < 4; i++) {
+					if (Library.isPrime(n * n - i * (n - 1)))
+						numPrimes++;
+				}
+				if (n > 1 && numPrimes * 10 < n * 2 - 1)
+					return Integer.toString(n);
+			}
+			
+		}
+		
+	}
+
+SONUÇ: 40824
+_________________________________________________________________________________________________________________________________________________________________________________
+PROBLEM 118: PANDIGITAL PRIME SETS
+1-9 rakamlarının tüm permütasyonlarını oluşturdum ve daha sonra bunları sıralı prim setlerine ayırabilir miyim diye kontrol ettim. 
+
+	{	
+		public static void main(String[] args) {
+			System.out.println(new p118().run());
+		}
+		
+		
+		public String run() {
+			isPrime = Library.listPrimality(10000);
+			count = 0;
+			int[] digits = {1, 2, 3, 4, 5, 6, 7, 8, 9};
+			do countPrimeSets(digits, 0, 0);  // Try all permutations, and try all splits within each permutation
+			while (Library.nextPermutation(digits));
+			return Integer.toString(count);
+		}
+		
+		
+		private boolean[] isPrime;  // Cache for small numbers
+		private int count;
+		
+		
+		private void countPrimeSets(int[] digits, int startIndex, int prevNum) {
+			if (startIndex == digits.length)
+				count++;
+			else {
+				for (int split = startIndex + 1; split <= digits.length; split++) {
+					int num = toInteger(digits, startIndex, split);
+					if (num > prevNum && isPrime(num))
+						countPrimeSets(digits, split, num);
+				}
+			}
+		}
+		
+		
+		private boolean isPrime(int n) {
+			if (n < isPrime.length)
+				return isPrime[n];
+			else
+				return Library.isPrime(n);
+		}
+		
+		
+		private static int toInteger(int[] digits, int start, int end) {
+			int result = 0;
+			for (int i = start; i < end; i++)
+				result = result * 10 + digits[i];
+			return result;
+		}
+		
+	}
+
+________________________________________________________________________________________________________________________________________________________________________________
+PROBLEM 78: COIN PARTITIONS
+P(n) dersek Örneğin, beş altın tam olarak yedi farklı şekilde ayrılabilir, bu nedenle p (5) = 7
+{
+		
+		public static void main(String[] args) {
+			System.out.println(new p078().run());
+		}
+		
+		
+		private static final int MODULUS = Library.pow(10, 6);
+		
+		public String run() {
+			for (int limit = 1; ; limit *= 2) {
+				int result = search(limit);
+				if (result != -1)
+					return Integer.toString(result);
+			}
+		}
+		
+		
+		private static int search(int limit) {
+			/* 
+			 * bölümler [i] {yazılabileceğim yolların sayısı
+			 * pozitif tamsayıların sırasız bir toplamı} mod 10 ^ 6.
+			 * Bölme fonksiyonu P (n, k) ile hesaplanabilir.
+			 */
+			 
+			int[] partitions = new int[limit];
+			partitions[0] = 1;
+			for (int i = 1; i < limit; i++) {
+				for (int j = i; j < limit; j++)
+					partitions[j] = (partitions[j] + partitions[j - i]) % MODULUS;
+			}
+			for (int i = 0; i < limit; i++) {
+				if (partitions[i] == 0)
+					return i;
+			}
+			return -1;
+		}
+		
+	}
+
+SONUÇ: 669171001
 
